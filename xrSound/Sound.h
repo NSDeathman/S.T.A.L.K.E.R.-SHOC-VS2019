@@ -27,6 +27,7 @@ class XRSOUND_API CSound_source;
 class XRSOUND_API CSound_emitter;
 class XRSOUND_API CSound_stream_interface;
 class XRSOUND_API CSound_environment;
+struct SEAXEnvironmentData;
 
 //
 XRSOUND_API extern u32 psSoundFreq;
@@ -370,6 +371,8 @@ class XRSOUND_API CSound_manager_interface
 	virtual void set_environment(u32 id, CSound_environment** dst_env) = 0;
 	virtual void set_environment_size(CSound_environment* src_env, CSound_environment** dst_env) = 0;
 #endif
+
+	virtual void commit_eax(const SEAXEnvironmentData* data) = 0;
 };
 extern XRSOUND_API CSound_manager_interface* Sound;
 

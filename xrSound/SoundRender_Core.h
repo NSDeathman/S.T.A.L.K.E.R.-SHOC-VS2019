@@ -7,6 +7,9 @@
 #include "SoundRender_Cache.h"
 #include "soundrender_environment.h"
 
+#include <mmsystem.h>
+#include "../xr_3da/xrGame/PresenceAudioIntegration/Sound_environment.h"
+
 class CSoundRender_Core : public CSound_manager_interface
 {
 	volatile BOOL bLocked;
@@ -140,6 +143,15 @@ class CSoundRender_Core : public CSound_manager_interface
 	void env_load();
 	void env_unload();
 	void env_apply();
+
+	virtual void commit_eax(const SEAXEnvironmentData* data);
+
+	Presence::ISoundOcclusionCalculator* m_pOcclusion = nullptr;
+
+	void SetOcclusion(Presence::ISoundOcclusionCalculator* pOcc)
+	{
+		m_pOcclusion = pOcc;
+	}
 };
 extern CSoundRender_Core* SoundRender;
 #endif
