@@ -40,7 +40,31 @@ void CSoundRender_Emitter::update(float dt)
 		dwTimeToStop = dwTime + source->dwTimeTotal;
 		dwTimeToPropagade = dwTime;
 		fade_volume = 1.f;
-		occluder_volume = SoundRender->get_occlusion(p_source.position, .2f, occluder);
+		
+		{
+			Fvector l_pos = SoundRender->listener_position();
+			Fvector s_pos = p_source.position;
+
+			float fSomOcclusion = SoundRender->get_occlusion_to(l_pos, s_pos);
+			if (fSomOcclusion < 0.01f)
+			{
+				occluder_volume = 0.0f;
+			}
+			else
+			{
+				if (SoundRender->m_pOcclusion)
+				{
+					Presence::float3 listener(l_pos.x, l_pos.y, l_pos.z);
+					Presence::float3 source(s_pos.x, s_pos.y, s_pos.z);
+					occluder_volume = SoundRender->m_pOcclusion->CalculateOcclusion(listener, source);
+				}
+				else
+				{
+					occluder_volume = SoundRender->get_occlusion(p_source.position, .2f, occluder);
+				}
+			}
+		}
+
 		smooth_volume = p_source.base_volume * p_source.volume *
 						(owner_data->s_type == st_Effect ? psSoundVEffects * psSoundVFactor : psSoundVMusic) *
 						(b2D ? 1.f : occluder_volume);
@@ -68,7 +92,31 @@ void CSoundRender_Emitter::update(float dt)
 		dwTimeToStop = 0xffffffff;
 		dwTimeToPropagade = dwTime;
 		fade_volume = 1.f;
-		occluder_volume = SoundRender->get_occlusion(p_source.position, .2f, occluder);
+
+		{
+			Fvector l_pos = SoundRender->listener_position();
+			Fvector s_pos = p_source.position;
+
+			float fSomOcclusion = SoundRender->get_occlusion_to(l_pos, s_pos);
+			if (fSomOcclusion < 0.01f)
+			{
+				occluder_volume = 0.0f;
+			}
+			else
+			{
+				if (SoundRender->m_pOcclusion)
+				{
+					Presence::float3 listener(l_pos.x, l_pos.y, l_pos.z);
+					Presence::float3 source(s_pos.x, s_pos.y, s_pos.z);
+					occluder_volume = SoundRender->m_pOcclusion->CalculateOcclusion(listener, source);
+				}
+				else
+				{
+					occluder_volume = SoundRender->get_occlusion(p_source.position, .2f, occluder);
+				}
+			}
+		}
+
 		smooth_volume = p_source.base_volume * p_source.volume *
 						(owner_data->s_type == st_Effect ? psSoundVEffects * psSoundVFactor : psSoundVMusic) *
 						(b2D ? 1.f : occluder_volume);
@@ -244,7 +292,32 @@ BOOL CSoundRender_Emitter::update_culling(float dt)
 		fade_volume += dt * 10.f * fade_scale;
 
 		// Update occlusion
-		volume_lerp(occluder_volume, SoundRender->get_occlusion(p_source.position, .2f, occluder), 1.f, dt);
+		float target_occlusion = 1.0f;
+		Fvector l_pos = SoundRender->listener_position();
+		Fvector s_pos = p_source.position;
+
+		float fSomOcclusion = SoundRender->get_occlusion_to(l_pos, s_pos);
+
+		if (fSomOcclusion < 0.01f)
+		{
+			target_occlusion = 0.0f;
+		}
+		else
+		{
+			if (SoundRender->m_pOcclusion)
+			{
+				Presence::float3 listener(l_pos.x, l_pos.y, l_pos.z);
+				Presence::float3 source(s_pos.x, s_pos.y, s_pos.z);
+				target_occlusion = SoundRender->m_pOcclusion->CalculateOcclusion(listener, source);
+			}
+			else
+			{
+				target_occlusion = SoundRender->get_occlusion(p_source.position, .2f, occluder);
+			}
+		}
+
+		volume_lerp(occluder_volume, target_occlusion, 10.f, dt);
+
 		clamp(occluder_volume, 0.f, 1.f);
 	}
 	clamp(fade_volume, 0.f, 1.f);
