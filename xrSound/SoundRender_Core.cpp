@@ -470,45 +470,39 @@ void CSoundRender_Core::update_listener(const Fvector& P, const Fvector& D, cons
 void CSoundRender_Core::i_eax_listener_set(CSound_environment* _E)
 {
 	VERIFY(bEAX);
-	CSoundRender_Environment* E = static_cast<CSoundRender_Environment*>(_E);
+	// _E больше не используется – параметры жёстко заданы для проверки
 	EAXLISTENERPROPERTIES ep;
-	ep.lRoom = iFloor(E->Room);							 // room effect level at low frequencies
-	ep.lRoomHF = iFloor(E->RoomHF);						 // room effect high-frequency level re. low frequency level
-	ep.flRoomRolloffFactor = E->RoomRolloffFactor;		 // like DS3D flRolloffFactor but for room effect
-	ep.flDecayTime = E->DecayTime;						 // reverberation decay time at low frequencies
-	ep.flDecayHFRatio = E->DecayHFRatio;				 // high-frequency to low-frequency decay time ratio
-	ep.lReflections = iFloor(E->Reflections);			 // early reflections level relative to room effect
-	ep.flReflectionsDelay = E->ReflectionsDelay;		 // initial reflection delay time
-	ep.lReverb = iFloor(E->Reverb);						 // late reverberation level relative to room effect
-	ep.flReverbDelay = E->ReverbDelay;					 // late reverberation delay time relative to initial reflection
-	ep.dwEnvironment = EAXLISTENER_DEFAULTENVIRONMENT;	 // sets all listener properties
-	ep.flEnvironmentSize = E->EnvironmentSize;			 // environment size in meters
-	ep.flEnvironmentDiffusion = E->EnvironmentDiffusion; // environment diffusion
-	ep.flAirAbsorptionHF = E->AirAbsorptionHF;			 // change in level per meter at 5 kHz
-	ep.dwFlags = EAXLISTENER_DEFAULTFLAGS;				 // modifies the behavior of properties
+
+	// === Тестовые значения для отчётливого эха ===
+	ep.lRoom              = 0;             // максимальный уровень эффекта комнаты (0 дБ)
+	ep.lRoomHF            = 0;             // то же на высоких частотах
+	ep.flRoomRolloffFactor = 0.0f;         // без затухания реверберации с расстоянием
+	ep.flDecayTime        = 5.0f;          // длительное время спада (5 секунд)
+	ep.flDecayHFRatio     = 1.0f;          // BЧ и НЧ затухают одинаково
+	ep.lReflections       = 0;             // ранние отражения на максимуме
+	ep.flReflectionsDelay = 0.2f;          // заметная задержка первого отражения (200 мс)
+	ep.lReverb            = 0;             // поздняя реверберация на максимуме
+	ep.flReverbDelay      = 0.1f;          // задержка поздней реверберации (100 мс)
+	ep.dwEnvironment      = EAXLISTENER_DEFAULTENVIRONMENT; // не используется в этом коде
+	ep.flEnvironmentSize  = 50.0f;         // большое помещение (50 метров)
+	ep.flEnvironmentDiffusion = 1.0f;      // максимальная диффузия
+	ep.flAirAbsorptionHF  = -1.0f;         // небольшое поглощение высоких частот
+	ep.dwFlags            = EAXLISTENER_DEFAULTFLAGS; // стандартные флаги
 
 	u32 deferred = bDeferredEAX ? DSPROPERTY_EAXLISTENER_DEFERRED : 0;
 
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_ROOM, &ep.lRoom, sizeof(LONG));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_ROOMHF, &ep.lRoomHF, sizeof(LONG));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_ROOMROLLOFFFACTOR,
-			  &ep.flRoomRolloffFactor, sizeof(float));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_DECAYTIME, &ep.flDecayTime,
-			  sizeof(float));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_DECAYHFRATIO, &ep.flDecayHFRatio,
-			  sizeof(float));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_REFLECTIONS, &ep.lReflections,
-			  sizeof(LONG));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_REFLECTIONSDELAY,
-			  &ep.flReflectionsDelay, sizeof(float));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_REVERB, &ep.lReverb, sizeof(LONG));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_REVERBDELAY, &ep.flReverbDelay,
-			  sizeof(float));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_ENVIRONMENTDIFFUSION,
-			  &ep.flEnvironmentDiffusion, sizeof(float));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_AIRABSORPTIONHF,
-			  &ep.flAirAbsorptionHF, sizeof(float));
-	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_FLAGS, &ep.dwFlags, sizeof(DWORD));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_ROOM,              &ep.lRoom, sizeof(LONG));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_ROOMHF,            &ep.lRoomHF, sizeof(LONG));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_ROOMROLLOFFFACTOR, &ep.flRoomRolloffFactor, sizeof(float));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_DECAYTIME,         &ep.flDecayTime, sizeof(float));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_DECAYHFRATIO,      &ep.flDecayHFRatio, sizeof(float));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_REFLECTIONS,       &ep.lReflections, sizeof(LONG));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_REFLECTIONSDELAY,  &ep.flReflectionsDelay, sizeof(float));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_REVERB,            &ep.lReverb, sizeof(LONG));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_REVERBDELAY,       &ep.flReverbDelay, sizeof(float));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_ENVIRONMENTDIFFUSION, &ep.flEnvironmentDiffusion, sizeof(float));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_AIRABSORPTIONHF,   &ep.flAirAbsorptionHF, sizeof(float));
+	i_eax_set(&DSPROPSETID_EAX_ListenerProperties, deferred | DSPROPERTY_EAXLISTENER_FLAGS,             &ep.dwFlags, sizeof(DWORD));
 }
 
 void CSoundRender_Core::i_eax_listener_get(CSound_environment* _E)
