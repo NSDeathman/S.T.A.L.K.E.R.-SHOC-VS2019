@@ -52,6 +52,9 @@
 #include "physicobject.h"
 #endif
 
+#include "PresenceAudioIntegration/Sound_environment.h"
+
+CSoundEnvironment* g_SoundEnvironment = nullptr;
 ENGINE_API bool g_dedicated_server;
 
 extern BOOL g_bDebugDumpPhysicsStep;
@@ -189,6 +192,12 @@ CLevel::CLevel()
 	}
 	*/
 	//---------------------------------------------------------
+
+	if (!g_dedicated_server)
+	{
+		g_SoundEnvironment = xr_new<CSoundEnvironment>();
+		g_SoundEnvironment->OnLevelLoad();
+	}
 }
 
 extern CAI_Space* g_ai_space;
@@ -197,6 +206,12 @@ CLevel::~CLevel()
 {
 	//	g_pGameLevel		= NULL;
 	Msg("- Destroying level");
+
+	if (!g_dedicated_server)
+	{
+		g_SoundEnvironment->OnLevelUnload();
+		xr_delete(g_SoundEnvironment);
+	}
 
 	Engine.Event.Handler_Detach(eEntitySpawn, this);
 
@@ -570,6 +585,8 @@ void CLevel::OnFrame()
 	// update static sounds
 	if (!g_dedicated_server)
 	{
+		g_SoundEnvironment->Update();
+
 		if (g_mt_config.test(mtLevelSounds))
 			Device.seqParallel.push_back(
 				fastdelegate::FastDelegate0<>(m_level_sound_manager, &CLevelSoundManager::Update));
