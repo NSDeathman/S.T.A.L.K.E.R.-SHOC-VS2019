@@ -2293,6 +2293,9 @@
     <Filter Include="UI\Tutorial">
       <UniqueIdentifier>{f8362524-5b63-42ba-86d7-e93a333b5fc7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Presence Audio Integration">
+      <UniqueIdentifier>{b2b867c9-fa98-43f0-b2f4-fef31b5a0c49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mt_config.h">
@@ -6558,6 +6561,15 @@
     <ClInclude Include="ui\UIGameTutorial.h">
       <Filter>UI\Tutorial</Filter>
     </ClInclude>
+    <ClInclude Include="PresenceAudioIntegration\Sound_environment.h">
+      <Filter>Presence Audio Integration</Filter>
+    </ClInclude>
+    <ClInclude Include="PresenceAudioIntegration\Sound_environment_common.h">
+      <Filter>Presence Audio Integration</Filter>
+    </ClInclude>
+    <ClInclude Include="PresenceAudioIntegration\Sound_environment_geometry_provider.h">
+      <Filter>Presence Audio Integration</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="damage_manager.cpp">
@@ -9706,6 +9718,9 @@
     </ClCompile>
     <ClCompile Include="ui\UIGameTutorialVideoItem.cpp">
       <Filter>UI\Tutorial</Filter>
+    </ClCompile>
+    <ClCompile Include="PresenceAudioIntegration\Sound_environment.cpp">
+      <Filter>Presence Audio Integration</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
